@@ -32,7 +32,7 @@ Add executable scripts. Each one runs with `DARKMODE=1` (dark) or `DARKMODE=0` (
 
 ```sh
 cat > ~/.config/dark-scripter/announce.sh << 'EOF'
-#!/bin/bash
+#!/usr/bin/env bash
 if [ "$DARKMODE" = "1" ]; then
   say "dark mode"
 else
@@ -44,7 +44,7 @@ chmod +x ~/.config/dark-scripter/announce.sh
 
 ```sh
 cat > ~/.config/dark-scripter/notify.sh << 'EOF'
-#!/bin/bash
+#!/usr/bin/env bash
 if [ "$DARKMODE" = "1" ]; then
   osascript -e 'display notification "Switched to dark mode" with title "dark-scripter"'
 else
