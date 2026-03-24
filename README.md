@@ -54,7 +54,31 @@ EOF
 chmod +x ~/.config/dark-scripter/notify.sh
 ```
 
-Scripts run in alphabetical order. Only executable files are run — non-executable files and dotfiles like `.DS_Store` are skipped.
+Scripts run in alphabetical order. Only executable files are run. Files starting with `_` are skipped, so you can use them as helpers called by other scripts. Non-executable files and dotfiles like `.DS_Store` are also skipped.
+
+### Helper scripts
+
+Use the `_` prefix for shared helper scripts that other scripts can source but dark-scripter won't run directly:
+
+```sh
+cat > ~/.config/dark-scripter/_common.sh << 'EOF'
+#!/usr/bin/env bash
+export PATH="/opt/homebrew/bin:$PATH"
+current_mode() {
+  if [ "$DARKMODE" = "1" ]; then echo "dark"; else echo "light"; fi
+}
+EOF
+chmod +x ~/.config/dark-scripter/_common.sh
+```
+
+```sh
+cat > ~/.config/dark-scripter/theme.sh << 'EOF'
+#!/usr/bin/env bash
+source "$(dirname "$0")/_common.sh"
+echo "Switched to $(current_mode) mode"
+EOF
+chmod +x ~/.config/dark-scripter/theme.sh
+```
 
 ## Running
 

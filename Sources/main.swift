@@ -1,6 +1,6 @@
 import Cocoa
 
-let version = "1.0.0"
+let version = "1.1.0"
 let configDir = FileManager.default.homeDirectoryForCurrentUser
     .appendingPathComponent(".config/dark-scripter")
 
@@ -11,6 +11,7 @@ if CommandLine.arguments.contains("--help") || CommandLine.arguments.contains("-
     print("")
     print("Each executable file in the config directory is run with DARKMODE=1 (dark)")
     print("or DARKMODE=0 (light) set in the environment. Scripts run in alphabetical order.")
+    print("Files starting with _ are skipped, so you can use them as helpers called by other scripts.")
     print("")
     print("Usage: dark-scripter [--help] [--version]")
     exit(0)
@@ -52,7 +53,7 @@ func runScripts() {
 
     for script in scripts {
         let path = configDir.appendingPathComponent(script).path
-        guard fm.isExecutableFile(atPath: path) else { continue }
+        guard !script.hasPrefix("_"), fm.isExecutableFile(atPath: path) else { continue }
 
         let process = Process()
         process.executableURL = URL(fileURLWithPath: path)
