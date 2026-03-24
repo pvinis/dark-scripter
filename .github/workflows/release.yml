@@ -89,13 +89,6 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "update-dark-scripter-${VERSION}"
           git add Formula/dark-scripter.rb
           git commit -m "Update dark-scripter to ${VERSION}"
-          git push origin "update-dark-scripter-${VERSION}"
-
-          gh pr create \
-            --repo pvinis/homebrew-pvinis \
-            --title "Update dark-scripter to ${VERSION}" \
-            --body "Automated update from [dark-scripter v${VERSION}](https://github.com/pvinis/dark-scripter/releases/tag/${GITHUB_REF_NAME})" \
-            --head "update-dark-scripter-${VERSION}"
+          git push origin main
