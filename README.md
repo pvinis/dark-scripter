@@ -31,8 +31,10 @@ cat > ~/.config/dark-scripter/announce.sh << 'EOF'
 #!/bin/bash
 if [ "$DARKMODE" = "1" ]; then
   say "dark mode"
+  osascript -e 'display notification "Switched to dark mode" with title "dark-scripter"'
 else
   say "light mode"
+  osascript -e 'display notification "Switched to light mode" with title "dark-scripter"'
 fi
 EOF
 chmod +x ~/.config/dark-scripter/announce.sh
