@@ -42,7 +42,7 @@ Scripts run in alphabetical order. Only executable files are run — non-executa
 
 ## Running
 
-Start as a background service (starts automatically on login):
+Start as a background service (recommended — starts automatically on login):
 
 ```sh
 brew services start dark-scripter
