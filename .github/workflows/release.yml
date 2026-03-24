@@ -11,7 +11,7 @@ jobs:
   build-and-release:
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up mise
         uses: jdx/mise-action@v4
@@ -40,10 +40,10 @@ jobs:
           if [[ "$GITHUB_REF_NAME" == *-* ]]; then
             PRERELEASE="--prerelease"
           fi
+          gh release delete "$GITHUB_REF_NAME" --yes 2>/dev/null || true
           gh release create "$GITHUB_REF_NAME" \
             .build/apple/Products/Release/dark-scripter-macos-universal.zip \
             --generate-notes \
-            --clobber \
             $PRERELEASE
 
       - name: Update Homebrew formula
