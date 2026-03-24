@@ -1,5 +1,2 @@
-[settings]
-experimental = true
-
 [tools]
-swift = "6"
+swift = "6.1"
