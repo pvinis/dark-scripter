@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/icon.png" width="128" height="128" alt="dark-scripter icon">
+</p>
+
 # dark-scripter
 
 Run scripts when macOS switches between dark and light mode.
