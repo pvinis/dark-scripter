@@ -27,15 +27,15 @@ mkdir -p ~/.config/dark-scripter
 Add executable scripts. Each one runs with `DARKMODE=1` (dark) or `DARKMODE=0` (light) in the environment:
 
 ```sh
-cat > ~/.config/dark-scripter/notify.sh << 'EOF'
+cat > ~/.config/dark-scripter/announce.sh << 'EOF'
 #!/bin/bash
 if [ "$DARKMODE" = "1" ]; then
-  osascript -e 'display notification "Switched to dark mode" with title "dark-scripter"'
+  say "dark mode"
 else
-  osascript -e 'display notification "Switched to light mode" with title "dark-scripter"'
+  say "light mode"
 fi
 EOF
-chmod +x ~/.config/dark-scripter/notify.sh
+chmod +x ~/.config/dark-scripter/announce.sh
 ```
 
 Scripts run in alphabetical order. Only executable files are run — non-executable files and dotfiles like `.DS_Store` are skipped.
