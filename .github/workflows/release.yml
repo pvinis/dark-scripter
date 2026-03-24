@@ -11,7 +11,7 @@ jobs:
   build-and-release:
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up mise
         uses: jdx/mise-action@v4
