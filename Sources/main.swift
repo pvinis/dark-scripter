@@ -1,6 +1,6 @@
 import Cocoa
 
-let version = "0.1.7"
+let version = "0.1.8"
 let configDir = FileManager.default.homeDirectoryForCurrentUser
     .appendingPathComponent(".config/dark-scripter")
 
@@ -74,7 +74,7 @@ func runScripts() {
 }
 
 // Suppress Dock icon
-NSApp.setActivationPolicy(.prohibited)
+NSApplication.shared.setActivationPolicy(.prohibited)
 
 // Listen for appearance changes
 DistributedNotificationCenter.default.addObserver(
