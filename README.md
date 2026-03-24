@@ -48,7 +48,7 @@ Start as a background service (recommended):
 brew services start dark-scripter
 ```
 
-Or run directly:
+Or run once:
 
 ```sh
 dark-scripter
