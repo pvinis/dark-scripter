@@ -43,6 +43,7 @@ jobs:
           gh release create "$GITHUB_REF_NAME" \
             .build/apple/Products/Release/dark-scripter-macos-universal.zip \
             --generate-notes \
+            --clobber \
             $PRERELEASE
 
       - name: Update Homebrew formula
