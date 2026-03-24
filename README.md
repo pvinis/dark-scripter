@@ -5,7 +5,7 @@ Run scripts when macOS switches between dark and light mode.
 ## Install
 
 ```sh
-brew install pvinis/formulae/dark-scripter
+brew install pvinis/pvinis/dark-scripter
 ```
 
 Or build from source:
@@ -42,7 +42,7 @@ Scripts run in alphabetical order. Only executable files are run — non-executa
 
 ## Running
 
-Start as a background service (recommended):
+Start as a background service (starts automatically on login):
 
 ```sh
 brew services start dark-scripter
