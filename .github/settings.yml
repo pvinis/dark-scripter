@@ -1,0 +1,6 @@
+repository:
+  description: Run scripts when macOS switches between dark and light mode.
+  topics: macos, dark-mode, light-mode, swift, cli, appearance
+  has_wiki: false
+  has_projects: false
+  delete_branch_on_merge: true
