@@ -23,16 +23,11 @@ jobs:
           fi
           echo "VERSION=$TAG_VERSION" >> "$GITHUB_ENV"
 
-      - name: Build universal binary
-        run: swift build -c release --arch arm64 --arch x86_64 --disable-sandbox
+      - name: Build and package
+        run: make package
 
       - name: Smoke test
         run: .build/apple/Products/Release/dark-scripter --version
-
-      - name: Package
-        run: |
-          cd .build/apple/Products/Release
-          zip dark-scripter-macos-universal.zip dark-scripter
 
       - name: Create release
         env:
