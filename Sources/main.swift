@@ -1,6 +1,6 @@
 import Cocoa
 
-let version = "0.1.6"
+let version = "0.1.7"
 let configDir = FileManager.default.homeDirectoryForCurrentUser
     .appendingPathComponent(".config/dark-scripter")
 
