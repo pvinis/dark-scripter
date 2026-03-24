@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/icon.png" width="200" height="200" alt="dark-scripter icon">
+  <img src="images/icon.png" width="300" height="300" alt="dark-scripter icon">
 </p>
 
 # dark-scripter
