@@ -5,7 +5,7 @@ Run scripts when macOS switches between dark and light mode.
 ## Install
 
 ```sh
-brew install pvinis/formulae/dark-scripter
+brew install pvinis/pvinis/dark-scripter
 ```
 
 Or build from source:
@@ -24,25 +24,37 @@ Create a config directory and add scripts:
 mkdir -p ~/.config/dark-scripter
 ```
 
-Add executable scripts. Each one runs with `DARKMODE=1` (dark) or `DARKMODE=0` (light) in the environment:
+Add executable scripts. Each one runs with `DARKMODE=1` (dark) or `DARKMODE=0` (light) in the environment. You can have as many scripts as you like — they all run in alphabetical order on every change.
 
 ```sh
-cat > ~/.config/dark-scripter/01-terminal.sh << 'EOF'
+cat > ~/.config/dark-scripter/announce.sh << 'EOF'
 #!/bin/bash
 if [ "$DARKMODE" = "1" ]; then
-  echo "Switched to dark mode"
+  say "dark mode"
 else
-  echo "Switched to light mode"
+  say "light mode"
 fi
 EOF
-chmod +x ~/.config/dark-scripter/01-terminal.sh
+chmod +x ~/.config/dark-scripter/announce.sh
+```
+
+```sh
+cat > ~/.config/dark-scripter/notify.sh << 'EOF'
+#!/bin/bash
+if [ "$DARKMODE" = "1" ]; then
+  osascript -e 'display notification "Switched to dark mode" with title "dark-scripter"'
+else
+  osascript -e 'display notification "Switched to light mode" with title "dark-scripter"'
+fi
+EOF
+chmod +x ~/.config/dark-scripter/notify.sh
 ```
 
 Scripts run in alphabetical order. Only executable files are run — non-executable files and dotfiles like `.DS_Store` are skipped.
 
 ## Running
 
-Start as a background service (recommended):
+Start as a background service (recommended way. it will start automatically on login):
 
 ```sh
 brew services start dark-scripter
