@@ -94,6 +94,29 @@ Or run once:
 dark-scripter
 ```
 
+## Checking script results
+
+See what happened the last time scripts ran:
+
+```sh
+dark-scripter last-run
+```
+
+```
+Last run: 2026-03-25 14:32:01 (dark mode)
+  ok    announce.sh  120ms
+  ok    notify.sh    45ms
+  FAIL  theme.sh     exit 1  12ms
+```
+
+For machine-readable output:
+
+```sh
+dark-scripter last-run --json
+```
+
+Results are stored in `~/.local/state/dark-scripter/last-run.json`.
+
 ## How It Works
 
 - Listens for `AppleInterfaceThemeChangedNotification` via macOS `DistributedNotificationCenter`
