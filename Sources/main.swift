@@ -151,9 +151,7 @@ func runScripts() {
     }
     let scripts = entries.sorted()
 
-    var env = ProcessInfo.processInfo.environment
-    env["DARKMODE"] = mode
-
+    let shell = ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/zsh"
     var results: [ScriptResult] = []
 
     for script in scripts {
@@ -161,8 +159,8 @@ func runScripts() {
         guard !script.hasPrefix("_"), fm.isExecutableFile(atPath: path) else { continue }
 
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: path)
-        process.environment = env
+        process.executableURL = URL(fileURLWithPath: shell)
+        process.arguments = ["-l", "-c", "DARKMODE=\(mode) exec \(path)"]
         process.currentDirectoryURL = configDir
         process.standardOutput = FileHandle.standardOutput
         process.standardError = FileHandle.standardError
