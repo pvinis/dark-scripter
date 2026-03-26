@@ -1,0 +1,155 @@
+name: Version Bump
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+concurrency:
+  group: version-bump
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  version-bump:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-tags: true
+
+      - name: Extract labels
+        id: labels
+        env:
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          # Determine version bump type (highest wins: major > minor > patch)
+          BUMP=""
+          if echo "$LABELS" | grep -q '"major"'; then
+            BUMP="major"
+          elif echo "$LABELS" | grep -q '"minor"'; then
+            BUMP="minor"
+          elif echo "$LABELS" | grep -q '"patch"'; then
+            BUMP="patch"
+          fi
+
+          if [ -z "$BUMP" ]; then
+            echo "No version label found. Skipping release."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+          # Determine changelog categories (default to "Changed" if none)
+          CATEGORIES=""
+          echo "$LABELS" | grep -q '"added"' && CATEGORIES="${CATEGORIES}added,"
+          echo "$LABELS" | grep -q '"changed"' && CATEGORIES="${CATEGORIES}changed,"
+          echo "$LABELS" | grep -q '"fixed"' && CATEGORIES="${CATEGORIES}fixed,"
+          echo "$LABELS" | grep -q '"removed"' && CATEGORIES="${CATEGORIES}removed,"
+
+          if [ -z "$CATEGORIES" ]; then
+            CATEGORIES="changed,"
+          fi
+
+          echo "categories=${CATEGORIES%,}" >> "$GITHUB_OUTPUT"
+
+      - name: Compute new version
+        if: steps.labels.outputs.skip != 'true'
+        id: version
+        run: |
+          CURRENT=$(grep -o '"[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"' Sources/main.swift | tr -d '"')
+          if [ -z "$CURRENT" ]; then
+            echo "::error::Could not read version from Sources/main.swift"
+            exit 1
+          fi
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          BUMP="${{ steps.labels.outputs.bump }}"
+
+          case "$BUMP" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
+
+          NEW="${MAJOR}.${MINOR}.${PATCH}"
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "new=$NEW" >> "$GITHUB_OUTPUT"
+          echo "Bumping $CURRENT -> $NEW ($BUMP)"
+
+      - name: Check tag does not exist
+        if: steps.labels.outputs.skip != 'true'
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.new }}" >/dev/null 2>&1; then
+            echo "::error::Tag v${{ steps.version.outputs.new }} already exists"
+            exit 1
+          fi
+
+      - name: Update version in source
+        if: steps.labels.outputs.skip != 'true'
+        run: |
+          sed -i 's/let version = ".*"/let version = "${{ steps.version.outputs.new }}"/' Sources/main.swift
+
+      - name: Update CHANGELOG.md
+        if: steps.labels.outputs.skip != 'true'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          NEW_VERSION: ${{ steps.version.outputs.new }}
+          PREV_VERSION: ${{ steps.version.outputs.current }}
+          CATEGORIES: ${{ steps.labels.outputs.categories }}
+          REPO: ${{ github.repository }}
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          ENTRY="- ${PR_TITLE} ([#${PR_NUMBER}](https://github.com/${REPO}/pull/${PR_NUMBER}))"
+
+          # Build the new version section into a temp file
+          {
+            echo "## [${NEW_VERSION}] - ${DATE}"
+            echo ""
+            IFS=',' read -ra CATS <<< "$CATEGORIES"
+            for cat in "${CATS[@]}"; do
+              HEADER=$(echo "$cat" | sed 's/./\U&/')
+              echo "### ${HEADER}"
+              echo ""
+              echo "$ENTRY"
+              echo ""
+            done
+          } > /tmp/new-section.md
+
+          COMPARE_LINK="[${NEW_VERSION}]: https://github.com/${REPO}/compare/v${PREV_VERSION}...v${NEW_VERSION}"
+
+          # Insert new section after the preamble, before any existing version entries
+          if grep -qn "^## \[" CHANGELOG.md; then
+            # Insert before the first version heading
+            FIRST_VERSION_LINE=$(grep -n "^## \[" CHANGELOG.md | head -1 | cut -d: -f1)
+            {
+              head -n $((FIRST_VERSION_LINE - 1)) CHANGELOG.md
+              cat /tmp/new-section.md
+              tail -n +"$FIRST_VERSION_LINE" CHANGELOG.md
+            } > /tmp/changelog-new.md
+            mv /tmp/changelog-new.md CHANGELOG.md
+          else
+            # No version entries yet, append after header
+            echo "" >> CHANGELOG.md
+            cat /tmp/new-section.md >> CHANGELOG.md
+          fi
+
+          # Append comparison link
+          echo "$COMPARE_LINK" >> CHANGELOG.md
+
+      - name: Commit, tag, and push
+        if: steps.labels.outputs.skip != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Sources/main.swift CHANGELOG.md
+          git commit -m "Bump version to ${{ steps.version.outputs.new }}"
+          git tag "v${{ steps.version.outputs.new }}"
+          git push origin main "v${{ steps.version.outputs.new }}"
