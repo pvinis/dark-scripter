@@ -46,19 +46,6 @@ jobs:
           echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
           echo "skip=false" >> "$GITHUB_OUTPUT"
 
-          # Determine changelog categories (default to "Changed" if none)
-          CATEGORIES=""
-          echo "$LABELS" | grep -q '"added"' && CATEGORIES="${CATEGORIES}added,"
-          echo "$LABELS" | grep -q '"changed"' && CATEGORIES="${CATEGORIES}changed,"
-          echo "$LABELS" | grep -q '"fixed"' && CATEGORIES="${CATEGORIES}fixed,"
-          echo "$LABELS" | grep -q '"removed"' && CATEGORIES="${CATEGORIES}removed,"
-
-          if [ -z "$CATEGORIES" ]; then
-            CATEGORIES="changed,"
-          fi
-
-          echo "categories=${CATEGORIES%,}" >> "$GITHUB_OUTPUT"
-
       - name: Compute new version
         if: steps.labels.outputs.skip != 'true'
         id: version
@@ -103,7 +90,6 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           NEW_VERSION: ${{ steps.version.outputs.new }}
           PREV_VERSION: ${{ steps.version.outputs.current }}
-          CATEGORIES: ${{ steps.labels.outputs.categories }}
           REPO: ${{ github.repository }}
         run: |
           DATE=$(date +%Y-%m-%d)
@@ -113,14 +99,10 @@ jobs:
           {
             echo "## [${NEW_VERSION}] - ${DATE}"
             echo ""
-            IFS=',' read -ra CATS <<< "$CATEGORIES"
-            for cat in "${CATS[@]}"; do
-              HEADER=$(echo "$cat" | sed 's/./\U&/')
-              echo "### ${HEADER}"
-              echo ""
-              echo "$ENTRY"
-              echo ""
-            done
+            echo "### Changed"
+            echo ""
+            echo "$ENTRY"
+            echo ""
           } > /tmp/new-section.md
 
           COMPARE_LINK="[${NEW_VERSION}]: https://github.com/${REPO}/compare/v${PREV_VERSION}...v${NEW_VERSION}"
